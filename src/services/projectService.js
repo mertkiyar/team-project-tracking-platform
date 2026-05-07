@@ -55,6 +55,19 @@ const projectService = {
             });
         });
     },
+
+    search(query) {
+        return new Promise((resolve, reject) => {
+            db.all(
+                "SELECT * FROM projects WHERE title LIKE ? OR description LIKE ?",
+                [`%${query}%`, `%${query}%`],
+                (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                }
+            );
+        });
+    }
 };
 
 module.exports = projectService;

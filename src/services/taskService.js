@@ -63,6 +63,20 @@ const taskService = {
             });
         });
     },
+
+    filter(filters) {
+        let query = "SELECT tasks.*, users.name as assigned_name FROM tasks LEFT JOIN users ON tasks.assigned_to = users.id WHERE 1=1";
+        const params = [];
+        if (filters.status) { query += " AND tasks.status = ?"; params.push(filters.status); }
+        if (filters.priority) { query += " AND tasks.priority = ?"; params.push(filters.priority); }
+        if (filters.project_id) { query += " AND tasks.project_id = ?"; params.push(filters.project_id); }
+        return new Promise((resolve, reject) => {
+            db.all(query, params, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    }
 };
 
 module.exports = taskService;

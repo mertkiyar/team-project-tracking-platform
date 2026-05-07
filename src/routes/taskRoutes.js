@@ -56,4 +56,14 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
+//GET /api/tasks/filter?status=todo&priority=high
+router.get("/filter", async (req, res) => {
+    try {
+        const tasks = await taskService.filter(req.query);
+        res.json(tasks);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

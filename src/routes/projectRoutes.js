@@ -56,4 +56,14 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
+//GET /api/projects/search?q=...
+router.get("/search", async (req, res) => {
+    try {
+        const projects = await projectService.search(req.query.q);
+        res.json(projects);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
