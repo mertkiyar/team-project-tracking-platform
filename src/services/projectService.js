@@ -1,0 +1,60 @@
+const db = require("../config/database");
+
+const projectService = {
+    getAll() {
+        return new Promise((resolve, reject) => {
+            db.all("SELECT * FROM projects", [], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    },
+
+    getById(id) {
+        return new Promise((resolve, reject) => {
+            db.get("SELECT * FROM projects WHERE id = ?", [id], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+    },
+
+    create(data) {
+        const { title, description, status, start_date, end_date } = data;
+        return new Promise((resolve, reject) => {
+            db.run(
+                "INSERT INTO projects (title, description, status, start_date, end_date) VALUES (?, ?, ?, ?, ?)",
+                [title, description, status || "active", start_date, end_date],
+                function (err) {
+                    if (err) reject(err);
+                    else resolve({ id: this.lastID, title, description, status, start_date, end_date });
+                }
+            );
+        });
+    },
+
+    update(id, data) {
+        const { title, description, status, start_date, end_date } = data;
+        return new Promise((resolve, reject) => {
+            db.run(
+                "UPDATE projects SET title=?, description=?, status=?, start_date=?, end_date=? WHERE id=?",
+                [title, description, status, start_date, end_date, id],
+                function (err) {
+                    if (err) reject(err);
+                    else resolve({ changes: this.changes });
+                }
+            );
+        });
+    },
+
+    delete(id) {
+        return new Promise((resolve, reject) => {
+            db.run("DELETE FROM projects WHERE id = ?", [id], function (err) {
+                if (err) reject(err);
+                else resolve({ changes: this.changes });
+            });
+        });
+    },
+};
+
+module.exports = projectService;
