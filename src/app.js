@@ -22,6 +22,10 @@ app.use("/api/projects", projectRoutes);
 const taskRoutes = require("./routes/taskRoutes");
 app.use("/api/tasks", taskRoutes);
 
+const memberRoutes = require("./routes/memberRoutes");
+app.use("/api/members", memberRoutes);
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
