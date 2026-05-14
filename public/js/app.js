@@ -81,8 +81,8 @@ document.getElementById("addProjectBtn")?.addEventListener("click", () => {
       <option value="completed">Completed</option>
       <option value="on-hold">On Hold</option>
     </select>
-    <input type="date" id="prjStart" />
-    <input type="date" id="prjEnd" />
+    <input type="date" id="prjStart" required />
+    <input type="date" id="prjEnd" required />
     <button type="submit" class="btn-primary">Save Project</button>
   `);
 
@@ -122,8 +122,8 @@ async function editProject(id) {
       <option value="completed" ${p.status === 'completed' ? 'selected' : ''}>Completed</option>
       <option value="on-hold" ${p.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
     </select>
-    <input type="date" id="prjStart" value="${p.start_date || ''}" />
-    <input type="date" id="prjEnd" value="${p.end_date || ''}" />
+    <input type="date" id="prjStart" value="${p.start_date || ''}" required />
+    <input type="date" id="prjEnd" value="${p.end_date || ''}" required />
     <button type="submit" class="btn-primary">Update Project</button>
   `);
 
