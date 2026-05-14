@@ -11,6 +11,21 @@ const taskService = {
         });
     },
 
+    getById(id) {
+        return new Promise((resolve, reject) => {
+            db.get(
+                `SELECT tasks.*, users.name as assigned_name
+                 FROM tasks LEFT JOIN users ON tasks.assigned_to = users.id
+                 WHERE tasks.id = ?`,
+                [id],
+                (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                }
+            );
+        });
+    },
+
     getByProject(projectId) {
         return new Promise((resolve, reject) => {
             db.all(

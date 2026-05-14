@@ -18,6 +18,11 @@ async function api(endpoint, method = "GET", body = null) {
   return res.json();
 }
 
+function formatText(text) {
+  if (!text) return '';
+  return text.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
 // modal
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
@@ -41,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   loadProjects();
   loadUsers();
-  // loadtasks
+  loadTasks();
 });
 
 // projects - get
@@ -53,7 +58,7 @@ async function loadProjects() {
     <div class="card">
       <h3>${p.title}</h3>
       <p>${p.description}</p>
-      <p>Status: <strong>${p.status}</strong></p>
+      <p>Status: <strong>${formatText(p.status)}</strong></p>
       <div class="card-actions">
         <button onclick="editProject(${p.id})">Edit</button>
         <button onclick="deleteProject(${p.id})">Delete</button>
@@ -80,11 +85,11 @@ document.getElementById("addProjectBtn")?.addEventListener("click", () => {
   modalForm.onsubmit = async (e) => {
     e.preventDefault();
     const data = {
-      title: document.getElementById("projTitle").value,
-      description: document.getElementById("projDesc").value,
-      status: document.getElementById("projStatus").value,
-      start_date: document.getElementById("projStart").value,
-      end_date: document.getElementById("projEnd").value
+      title: document.getElementById("prjTitle").value,
+      description: document.getElementById("prjDesc").value,
+      status: document.getElementById("prjStatus").value,
+      start_date: document.getElementById("prjStart").value,
+      end_date: document.getElementById("prjEnd").value
     };
     await api("/projects", "POST", data);
     closeModal();
@@ -109,9 +114,9 @@ async function editProject(id) {
     <input type="text" id="prjTitle" placeholder="Project Title" value="${p.title}" required />
     <textarea id="prjDesc" placeholder="Description">${p.description || ''}</textarea>
     <select id="prjStatus">
-      <option value="Active" ${p.status === 'Active' ? 'selected' : ''}>Active</option>
-      <option value="Completed" ${p.status === 'Completed' ? 'selected' : ''}>Completed</option>
-      <option value="On Hold" ${p.status === 'On Hold' ? 'selected' : ''}>On Hold</option>
+      <option value="active" ${p.status === 'active' ? 'selected' : ''}>Active</option>
+      <option value="completed" ${p.status === 'completed' ? 'selected' : ''}>Completed</option>
+      <option value="on-hold" ${p.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
     </select>
     <input type="date" id="prjStart" value="${p.start_date || ''}" />
     <input type="date" id="prjEnd" value="${p.end_date || ''}" />
@@ -206,5 +211,134 @@ async function editUser(id) {
     await api(`/users/${id}`, "PUT", data);
     closeModal();
     loadUsers();
+  };
+}
+
+// tasks - get
+async function loadTasks() {
+  const tasks = await api("/tasks");
+  if (!tasks) return;
+  const list = document.getElementById("taskList");
+  if (!list) return;
+  list.innerHTML = tasks.map((t) => `
+    <div class="card">
+      <h3>${t.title}</h3>
+      <p>${t.description || ''}</p>
+      <br>
+      <p>Priority: <strong>${formatText(t.priority)}</strong></p>
+      <p>Status: <strong>${formatText(t.status)}</strong></p>
+      <br>
+      <p>Assigned: <strong>${t.assigned_name || 'Unassigned'}</strong></p>
+      <br>
+      <div class="card-actions">
+        <button onclick="editTask(${t.id})">Edit</button>
+        <button onclick="deleteTask(${t.id})">Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+// tasks - create
+document.getElementById("addTaskBtn")?.addEventListener("click", async () => {
+  const [projects, users] = await Promise.all([api("/projects"), api("/users")]);
+
+  openModal("Add New Task", `
+    <input type="text" id="taskTitle" placeholder="Task Title" required />
+    <textarea id="taskDesc" placeholder="Description"></textarea>
+    <select id="taskProject" required>
+      <option value="">Select Project</option>
+      ${projects.map(p => `<option value="${p.id}">${p.title}</option>`).join('')}
+    </select>
+    <select id="taskUser">
+      <option value="">Assign User (Optional)</option>
+      ${users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+    </select>
+    <select id="taskPriority">
+      <option value="low">Low</option>
+      <option value="medium" selected>Medium</option>
+      <option value="high">High</option>
+    </select>
+    <select id="taskStatus">
+      <option value="todo" selected>Todo</option>
+      <option value="in-progress">In Progress</option>
+      <option value="completed">Completed</option>
+    </select>
+    <input type="date" id="taskDeadline" />
+    <button type="submit" class="btn-primary">Save Task</button>
+  `);
+
+  modalForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById("taskTitle").value,
+      description: document.getElementById("taskDesc").value,
+      project_id: document.getElementById("taskProject").value,
+      assigned_to: document.getElementById("taskUser").value || null,
+      priority: document.getElementById("taskPriority").value,
+      status: document.getElementById("taskStatus").value,
+      deadline: document.getElementById("taskDeadline").value
+    };
+    await api("/tasks", "POST", data);
+    closeModal();
+    loadTasks();
+  };
+});
+
+// tasks - delete
+async function deleteTask(id) {
+  if (confirm("Are you sure you want to delete this task?")) {
+    await api(`/tasks/${id}`, "DELETE");
+    loadTasks();
+  }
+}
+
+// tasks - update
+async function editTask(id) {
+  const [task, projects, users] = await Promise.all([
+    api(`/tasks/${id}`),
+    api("/projects"),
+    api("/users")
+  ]);
+  if (!task) return;
+
+  openModal("Edit Task", `
+    <input type="text" id="taskTitle" placeholder="Task Title" value="${task.title}" required />
+    <textarea id="taskDesc" placeholder="Description">${task.description || ''}</textarea>
+    <select id="taskProject" required>
+      <option value="">Select Project</option>
+      ${projects.map(p => `<option value="${p.id}" ${p.id == task.project_id ? 'selected' : ''}>${p.title}</option>`).join('')}
+    </select>
+    <select id="taskUser">
+      <option value="">Assign User (Optional)</option>
+      ${users.map(u => `<option value="${u.id}" ${u.id == task.assigned_to ? 'selected' : ''}>${u.name}</option>`).join('')}
+    </select>
+    <select id="taskPriority">
+      <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+      <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+      <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+    </select>
+    <select id="taskStatus">
+      <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+      <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+      <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
+    </select>
+    <input type="date" id="taskDeadline" value="${task.deadline || ''}" />
+    <button type="submit" class="btn-primary">Update Task</button>
+  `);
+
+  modalForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById("taskTitle").value,
+      description: document.getElementById("taskDesc").value,
+      project_id: document.getElementById("taskProject").value,
+      assigned_to: document.getElementById("taskUser").value || null,
+      priority: document.getElementById("taskPriority").value,
+      status: document.getElementById("taskStatus").value,
+      deadline: document.getElementById("taskDeadline").value
+    };
+    await api(`/tasks/${id}`, "PUT", data);
+    closeModal();
+    loadTasks();
   };
 }

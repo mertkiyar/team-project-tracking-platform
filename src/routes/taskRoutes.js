@@ -12,6 +12,16 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET /api/tasks/filter?status=todo&priority=high
+router.get("/filter", async (req, res) => {
+    try {
+        const tasks = await taskService.filter(req.query);
+        res.json(tasks);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // GET /api/tasks/:id
 router.get("/:id", async (req, res) => {
     try {
@@ -51,16 +61,6 @@ router.delete("/:id", async (req, res) => {
         const result = await taskService.delete(req.params.id);
         if (result.changes === 0) return res.status(404).json({ error: "Task not found" });
         res.json({ message: "Task deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-//GET /api/tasks/filter?status=todo&priority=high
-router.get("/filter", async (req, res) => {
-    try {
-        const tasks = await taskService.filter(req.query);
-        res.json(tasks);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
