@@ -40,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
     closeBtn.addEventListener("click", closeModal);
   }
   loadProjects();
+  loadUsers();
+  // loadtasks
 });
 
 // projects - get
@@ -128,5 +130,81 @@ async function editProject(id) {
     await api(`/projects/${id}`, "PUT", data);
     closeModal();
     loadProjects();
+  };
+}
+
+// users - get
+async function loadUsers() {
+  const users = await api("/users");
+  if (!users) return;
+  const list = document.getElementById("userList");
+  if (!list) return;
+  list.innerHTML = users.map((u) => `
+    <div class="card">
+      <h3>${u.name}</h3>
+      <p>${u.email}</p>
+      <br>
+      <p><strong>${u.department || 'N/A'}</strong></p>
+      <br>
+      <div class="card-actions">
+        <button onclick="editUser(${u.id})">Edit</button>
+        <button onclick="deleteUser(${u.id})">Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+// users - create
+document.getElementById("addUserBtn")?.addEventListener("click", () => {
+  openModal("Add New User", `
+    <input type="text" id="userName" placeholder="Name" required />
+    <input type="email" id="userEmail" placeholder="Email" required />
+    <input type="text" id="userDept" placeholder="Department" />
+    <button type="submit" class="btn-primary">Save User</button>
+  `);
+
+  modalForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("userName").value,
+      email: document.getElementById("userEmail").value,
+      department: document.getElementById("userDept").value
+    };
+    await api("/users", "POST", data);
+    closeModal();
+    loadUsers();
+  };
+});
+
+// users - delete
+async function deleteUser(id) {
+  if (confirm("Are you sure you want to delete this user?")) {
+    await api(`/users/${id}`, "DELETE");
+    loadUsers();
+  }
+}
+
+// users - update
+async function editUser(id) {
+  const user = await api(`/users/${id}`);
+  if (!user) return;
+
+  openModal("Edit User", `
+    <input type="text" id="userName" placeholder="Name" value="${user.name}" required />
+    <input type="email" id="userEmail" placeholder="Email" value="${user.email}" required />
+    <input type="text" id="userDept" placeholder="Department" value="${user.department || ''}" />
+    <button type="submit" class="btn-primary">Update User</button>
+  `);
+
+  modalForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("userName").value,
+      email: document.getElementById("userEmail").value,
+      department: document.getElementById("userDept").value
+    };
+    await api(`/users/${id}`, "PUT", data);
+    closeModal();
+    loadUsers();
   };
 }
