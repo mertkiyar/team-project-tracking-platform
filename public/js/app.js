@@ -58,7 +58,11 @@ async function loadProjects() {
     <div class="card">
       <h3>${p.title}</h3>
       <p>${p.description}</p>
+      <br>
+      <p>Start Date: ${p.start_date}</p>
+      <p>End Date: ${p.end_date}</p>
       <p>Status: <strong>${formatText(p.status)}</strong></p>
+      <br>
       <div class="card-actions">
         <button onclick="editProject(${p.id})">Edit</button>
         <button onclick="deleteProject(${p.id})">Delete</button>
