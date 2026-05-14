@@ -59,8 +59,8 @@ async function loadProjects() {
       <h3>${p.title}</h3>
       <p>${p.description}</p>
       <br>
-      <p>Start Date: ${p.start_date}</p>
-      <p>End Date: ${p.end_date}</p>
+      <p>Start Date: ${new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+      <p>Predicted End Date: ${new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
       <p>Status: <strong>${formatText(p.status)}</strong></p>
       <br>
       <div class="card-actions">
