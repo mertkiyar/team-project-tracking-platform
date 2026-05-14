@@ -174,3 +174,36 @@ select {
     resize: vertical;
     min-height: 80px;
 }
+
+/* CARD ACTIONS BUTTONS */
+.card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.card-actions button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s;
+    color: white;
+}
+
+.btn-edit {
+    background: #f59e0b; /* Amber/Yellow */
+}
+
+.btn-edit:hover {
+    background: #d97706;
+}
+
+.btn-delete {
+    background: #ef4444; /* Red */
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}

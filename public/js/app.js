@@ -59,13 +59,13 @@ async function loadProjects() {
       <h3>${p.title}</h3>
       <p>${p.description}</p>
       <br>
-      <p>Start Date: ${new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-      <p>Predicted End Date: ${new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+      <p>Start Date: <strong>${new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
+      <p>Predicted End Date: <strong>${new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
       <p>Status: <strong>${formatText(p.status)}</strong></p>
       <br>
       <div class="card-actions">
-        <button onclick="editProject(${p.id})">Edit</button>
-        <button onclick="deleteProject(${p.id})">Delete</button>
+        <button class="btn-edit" onclick="editProject(${p.id})">Edit</button>
+        <button class="btn-delete" onclick="deleteProject(${p.id})">Delete</button>
       </div>
     </div>
   `).join("");
@@ -156,8 +156,8 @@ async function loadUsers() {
       <p><strong>${u.department || 'N/A'}</strong></p>
       <br>
       <div class="card-actions">
-        <button onclick="editUser(${u.id})">Edit</button>
-        <button onclick="deleteUser(${u.id})">Delete</button>
+        <button class="btn-edit" onclick="editUser(${u.id})">Edit</button>
+        <button class="btn-delete" onclick="deleteUser(${u.id})">Delete</button>
       </div>
     </div>
   `).join("");
@@ -237,8 +237,8 @@ async function loadTasks() {
       <p>Assigned: <strong>${t.assigned_name || 'Unassigned'}</strong></p>
       <br>
       <div class="card-actions">
-        <button onclick="editTask(${t.id})">Edit</button>
-        <button onclick="deleteTask(${t.id})">Delete</button>
+        <button class="btn-edit" onclick="editTask(${t.id})">Edit</button>
+        <button class="btn-delete" onclick="deleteTask(${t.id})">Delete</button>
       </div>
     </div>
   `).join("");
