@@ -229,7 +229,9 @@ async function loadTasks() {
       <h3>${t.title}</h3>
       <p>${t.description || ''}</p>
       <br>
+      <p>Tag: <strong>${formatText(t.tag)}</strong></p>
       <p>Priority: <strong>${formatText(t.priority)}</strong></p>
+      <p>Deadline: <strong>${new Date(t.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
       <p>Status: <strong>${formatText(t.status)}</strong></p>
       <br>
       <p>Assigned: <strong>${t.assigned_name || 'Unassigned'}</strong></p>
@@ -262,6 +264,13 @@ document.getElementById("addTaskBtn")?.addEventListener("click", async () => {
       <option value="medium" selected>Medium</option>
       <option value="high">High</option>
     </select>
+    <select id="taskTag">
+      <option value="feature" selected>Feature</option>
+      <option value="bug">Bug</option>
+      <option value="fix">Fix</option>
+      <option value="enhancement">Enhancement</option>
+      <option value="docs">Docs</option>
+    </select>
     <select id="taskStatus">
       <option value="todo" selected>Todo</option>
       <option value="in-progress">In Progress</option>
@@ -278,6 +287,7 @@ document.getElementById("addTaskBtn")?.addEventListener("click", async () => {
       description: document.getElementById("taskDesc").value,
       project_id: document.getElementById("taskProject").value,
       assigned_to: document.getElementById("taskUser").value || null,
+      tag: document.getElementById("taskTag").value,
       priority: document.getElementById("taskPriority").value,
       status: document.getElementById("taskStatus").value,
       deadline: document.getElementById("taskDeadline").value
@@ -321,6 +331,13 @@ async function editTask(id) {
       <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
       <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
     </select>
+    <select id="taskTag">
+      <option value="feature" ${task.tag === 'feature' ? 'selected' : ''}>Feature</option>
+      <option value="bug" ${task.tag === 'bug' ? 'selected' : ''}>Bug</option>
+      <option value="fix" ${task.tag === 'fix' ? 'selected' : ''}>Fix</option>
+      <option value="enhancement" ${task.tag === 'enhancement' ? 'selected' : ''}>Enhancement</option>
+      <option value="docs" ${task.tag === 'docs' ? 'selected' : ''}>Docs</option>
+    </select>
     <select id="taskStatus">
       <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
       <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
@@ -337,6 +354,7 @@ async function editTask(id) {
       description: document.getElementById("taskDesc").value,
       project_id: document.getElementById("taskProject").value,
       assigned_to: document.getElementById("taskUser").value || null,
+      tag: document.getElementById("taskTag").value,
       priority: document.getElementById("taskPriority").value,
       status: document.getElementById("taskStatus").value,
       deadline: document.getElementById("taskDeadline").value

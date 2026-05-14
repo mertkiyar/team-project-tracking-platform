@@ -36,6 +36,7 @@ db.serialize(() => {
     assigned_to INTEGER,
     title TEXT NOT NULL,
     description TEXT,
+    tag TEXT DEFAULT 'feature',
     priority TEXT DEFAULT 'medium',
     status TEXT DEFAULT 'todo',
     deadline TEXT,
