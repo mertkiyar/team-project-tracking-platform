@@ -1,5 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const bcrypt = require("bcryptjs");
 
 const dbPath = path.join(__dirname, "../../database.db");
 const db = new sqlite3.Database(dbPath);
@@ -12,7 +13,22 @@ db.serialize(() => {
     password TEXT NOT NULL,
     role TEXT CHECK(role IN ('admin', 'project_manager', 'employee')) DEFAULT 'employee',
     department TEXT
-  )`);
+  )`, (err) => {
+    if (!err) {
+      const hashedPassword = bcrypt.hashSync("1234", 10);
+      db.get("SELECT * FROM users WHERE email = ?", ["admin@mail.com"], (err, row) => {
+        if (!row) {
+          db.run(
+            "INSERT INTO users (name, email, password, role, department) VALUES (?, ?, ?, ?, ?)",
+            ["Admin", "admin@mail.com", hashedPassword, "admin", "Administration"],
+            (err) => {
+              if (!err) console.log("Admin created");
+            }
+          );
+        }
+      });
+    }
+  });
 
   db.run(`CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
