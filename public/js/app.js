@@ -287,19 +287,6 @@ async function loadUsers() {
   if (!users) return;
   const list = document.getElementById("userList");
   if (!list) return;
-  // list.innerHTML = users.map((u) => `
-  //   <div class="card">
-  //     <h3>${u.name}</h3>
-  //     <p>${u.email}</p>
-  //     <br>
-  //     <p><strong>${u.department || 'N/A'}</strong></p>
-  //     <br>
-  //     <div class="card-actions">
-  //       <button class="btn-edit" onclick="editUser(${u.id})">Edit</button>
-  //       <button class="btn-delete" onclick="deleteUser(${u.id})">Delete</button>
-  //     </div>
-  //   </div>
-  // `).join("");
 
   list.innerHTML = "";
 
@@ -318,8 +305,18 @@ async function loadUsers() {
     const br = document.createElement("br");
     card.appendChild(br);
 
-    const department = document.createElement("strong");
-    department.textContent = u.department || "N/A";
+    const role = document.createElement("p");
+    role.textContent = "Role: ";
+    const strongRole = document.createElement("strong");
+    strongRole.textContent = u.role ? u.role.replace(/_/g, " ").toUpperCase() : "N/A";
+    role.appendChild(strongRole);
+    card.appendChild(role);
+
+    const department = document.createElement("p");
+    department.textContent = "Department: ";
+    const strongDept = document.createElement("strong");
+    strongDept.textContent = u.department || "N/A";
+    department.appendChild(strongDept);
     card.appendChild(department);
 
     const br2 = document.createElement("br");
@@ -351,6 +348,13 @@ document.getElementById("addUserBtn")?.addEventListener("click", () => {
   openModal("Add New User", `
     <input type="text" id="userName" placeholder="Name" required />
     <input type="email" id="userEmail" placeholder="Email" required />
+    <input type="password" id="userPassword" placeholder="Password" required />
+    <select id="userRole" required>
+      <option value="">Select Role</option>
+      <option value="employee">Employee</option>
+      <option value="project_manager">Project Manager</option>
+      <option value="admin">Admin</option>
+    </select>
     <input type="text" id="userDept" placeholder="Department" />
     <button type="submit" class="btn-primary">Save User</button>
   `);
@@ -360,6 +364,8 @@ document.getElementById("addUserBtn")?.addEventListener("click", () => {
     const data = {
       name: document.getElementById("userName").value,
       email: document.getElementById("userEmail").value,
+      password: document.getElementById("userPassword").value,
+      role: document.getElementById("userRole").value,
       department: document.getElementById("userDept").value
     };
     await api("/users", "POST", data);
@@ -384,6 +390,11 @@ async function editUser(id) {
   openModal("Edit User", `
     <input type="text" id="userName" placeholder="Name" value="${user.name}" required />
     <input type="email" id="userEmail" placeholder="Email" value="${user.email}" required />
+    <select id="userRole" required>
+      <option value="employee" ${user.role === 'employee' ? 'selected' : ''}>Employee</option>
+      <option value="project_manager" ${user.role === 'project_manager' ? 'selected' : ''}>Project Manager</option>
+      <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+    </select>
     <input type="text" id="userDept" placeholder="Department" value="${user.department || ''}" />
     <button type="submit" class="btn-primary">Update User</button>
   `);
@@ -393,6 +404,7 @@ async function editUser(id) {
     const data = {
       name: document.getElementById("userName").value,
       email: document.getElementById("userEmail").value,
+      role: document.getElementById("userRole").value,
       department: document.getElementById("userDept").value
     };
     await api(`/users/${id}`, "PUT", data);
