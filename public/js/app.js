@@ -70,6 +70,8 @@ async function loadProjects() {
   //   </div>
   // `).join("");
 
+  list.innerHTML = "";
+
   // projects card
   projects.forEach((p) => {
     const card = document.createElement("div");
@@ -223,6 +225,8 @@ async function loadUsers() {
   //   </div>
   // `).join("");
 
+  list.innerHTML = "";
+
   users.forEach((u) => {
     const card = document.createElement("div");
     card.className = "card";
@@ -345,6 +349,8 @@ async function loadTasks() {
   //     </div>
   //   </div>
   // `).join("");
+
+  list.innerHTML = "";
 
   tasks.forEach((t) => {
     const card = document.createElement("div");
