@@ -1,9 +1,10 @@
 const db = require("../config/database");
+const bcrypt = require("bcryptjs");
 
 const userService = {
     getAll() {
         return new Promise((resolve, reject) => {
-            db.all("SELECT * FROM users", [], (err, rows) => {
+            db.all("SELECT id, name, email, role, department FROM users", [], (err, rows) => {
                 if (err) reject(err);
                 else resolve(rows);
             });
@@ -12,7 +13,7 @@ const userService = {
 
     getById(id) {
         return new Promise((resolve, reject) => {
-            db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
+            db.get("SELECT id, name, email, role, department FROM users WHERE id = ?", [id], (err, row) => {
                 if (err) reject(err);
                 else resolve(row);
             });
@@ -20,25 +21,32 @@ const userService = {
     },
 
     create(data) {
-        const { name, email, department } = data;
+        const { name, email, password, role = 'employee', department } = data;
         return new Promise((resolve, reject) => {
-            db.run(
-                "INSERT INTO users (name, email, department) VALUES (?, ?, ?)",
-                [name, email, department],
-                function (err) {
-                    if (err) reject(err);
-                    else resolve({ id: this.lastID, name, email, department });
-                }
-            );
+            if (!name || !email || !password) {
+                return reject(new Error("Name, email and password are required"));
+            }
+            bcrypt.hash(password, 10, (err, hashedPassword) => {
+                if (err) return reject(err);
+                
+                db.run(
+                    "INSERT INTO users (name, email, password, role, department) VALUES (?, ?, ?, ?, ?)",
+                    [name, email, hashedPassword, role, department],
+                    function (err) {
+                        if (err) reject(err);
+                        else resolve({ id: this.lastID, name, email, role, department });
+                    }
+                );
+            });
         });
     },
 
     update(id, data) {
-        const { name, email, department } = data;
+        const { name, email, role, department } = data;
         return new Promise((resolve, reject) => {
             db.run(
-                "UPDATE users SET name = ?, email = ?, department = ? WHERE id = ?",
-                [name, email, department, id],
+                "UPDATE users SET name = ?, email = ?, role = ?, department = ? WHERE id = ?",
+                [name, email, role, department, id],
                 function (err) {
                     if (err) reject(err);
                     else resolve({ changes: this.changes });
