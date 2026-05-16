@@ -1,5 +1,55 @@
 const API = "http://localhost:3000/api";
 
+//auth
+function handleLogin() {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  const errorLogin = document.getElementById("loginError");
+
+  if (!email || !password) {
+    errorLogin.style.display = "block";
+    errorLogin.textContent = "Please fill all blanks!";
+    return;
+  }
+  // admin info
+  if (email === "admin@mail.com" && password === "1234") {
+    localStorage.setItem("authToken", "user_token_" + Date.now());
+    localStorage.setItem("userEmail", email);
+    showMainPage();
+    errorLogin.style.display = "none";
+  } else {
+    errorLogin.style.display = "block";
+    errorLogin.textContent = "Email or password is wrong, try again!";
+  }
+}
+
+function showMainPage() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("mainApp").style.display = "block";
+}
+
+function showLoginPage() {
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
+}
+
+function logout() {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userEmail");
+  document.getElementById("loginEmail").value = "";
+  document.getElementById("loginPassword").value = "";
+  showLoginPage();
+}
+
+function checkAuth() {
+  const token = localStorage.getItem("authToken");
+  if (token) {
+    showMainPage();
+  } else {
+    showLoginPage();
+  }
+}
+
 // navigation
 document.querySelectorAll(".nav-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -40,10 +90,36 @@ function closeModal() {
 
 // init
 document.addEventListener("DOMContentLoaded", () => {
+  // Check authentication on page load
+  checkAuth();
+
+  // Login - Enter tuşu ile giriş
+  const loginEmail = document.getElementById("loginEmail");
+  const loginPassword = document.getElementById("loginPassword");
+
+  if (loginEmail) {
+    loginEmail.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
+  }
+  if (loginPassword) {
+    loginPassword.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
+  }
+
+  // Modal close button
   const closeBtn = document.querySelector(".modal-close");
   if (closeBtn) {
     closeBtn.addEventListener("click", closeModal);
   }
+
+  //logout
+  const logoutBtn = document.querySelector(".logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
+
   loadProjects();
   loadUsers();
   loadTasks();
