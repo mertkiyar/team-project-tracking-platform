@@ -37,6 +37,14 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
     console.log("BODY:", req.body);
     try {
+        const { assigned_to, project_id } = req.body;
+        if (assigned_to && project_id) {
+            const isMember = await taskService.validateUserInProject(assigned_to, project_id);
+            if (!isMember) {
+                return res.status(403).json({ error: "User is not a member of this project" });
+            }
+        }
+
         const task = await taskService.create(req.body);
         res.status(201).json(task);
     } catch (err) {
@@ -47,6 +55,14 @@ router.post("/", async (req, res) => {
 // PUT /api/tasks/:id
 router.put("/:id", async (req, res) => {
     try {
+        const { assigned_to, project_id } = req.body;
+        if (assigned_to && project_id) {
+            const isMember = await taskService.validateUserInProject(assigned_to, project_id);
+            if (!isMember) {
+                return res.status(403).json({ error: "User is not a member of this project" });
+            }
+        }
+
         const result = await taskService.update(req.params.id, req.body);
         if (result.changes === 0) return res.status(404).json({ error: "Task not found" });
         res.json({ message: "Task updated" });
