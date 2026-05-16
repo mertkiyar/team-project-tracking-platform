@@ -28,7 +28,7 @@ const userService = {
             }
             bcrypt.hash(password, 10, (err, hashedPassword) => {
                 if (err) return reject(err);
-                
+
                 db.run(
                     "INSERT INTO users (name, email, password, role, department) VALUES (?, ?, ?, ?, ?)",
                     [name, email, hashedPassword, role, department],
