@@ -327,24 +327,99 @@ async function loadTasks() {
   if (!tasks) return;
   const list = document.getElementById("taskList");
   if (!list) return;
-  list.innerHTML = tasks.map((t) => `
-    <div class="card">
-      <h3>${t.title}</h3>
-      <p>${t.description || ''}</p>
-      <br>
-      <p>Tag: <strong>${formatText(t.tag)}</strong></p>
-      <p>Priority: <strong>${formatText(t.priority)}</strong></p>
-      <p>Deadline: <strong>${new Date(t.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
-      <p>Status: <strong>${formatText(t.status)}</strong></p>
-      <br>
-      <p>Assigned: <strong>${t.assigned_name || 'Unassigned'}</strong></p>
-      <br>
-      <div class="card-actions">
-        <button class="btn-edit" onclick="editTask(${t.id})">Edit</button>
-        <button class="btn-delete" onclick="deleteTask(${t.id})">Delete</button>
-      </div>
-    </div>
-  `).join("");
+  // list.innerHTML = tasks.map((t) => `
+  //   <div class="card">
+  //     <h3>${t.title}</h3>
+  //     <p>${t.description || ''}</p>
+  //     <br>
+  //     <p>Tag: <strong>${formatText(t.tag)}</strong></p>
+  //     <p>Priority: <strong>${formatText(t.priority)}</strong></p>
+  //     <p>Deadline: <strong>${new Date(t.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
+  //     <p>Status: <strong>${formatText(t.status)}</strong></p>
+  //     <br>
+  //     <p>Assigned: <strong>${t.assigned_name || 'Unassigned'}</strong></p>
+  //     <br>
+  //     <div class="card-actions">
+  //       <button class="btn-edit" onclick="editTask(${t.id})">Edit</button>
+  //       <button class="btn-delete" onclick="deleteTask(${t.id})">Delete</button>
+  //     </div>
+  //   </div>
+  // `).join("");
+
+  tasks.forEach((t) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = t.title;
+    card.appendChild(title);
+
+    const description = document.createElement("p");
+    description.textContent = t.description || "";
+    card.appendChild(description);
+
+    const br = document.createElement("br");
+    card.appendChild(br);
+
+    const tag = document.createElement("p");
+    tag.textContent = "Tag: ";
+    const strongTag = document.createElement("strong");
+    strongTag.textContent = formatText(t.tag);
+    tag.appendChild(strongTag);
+
+    card.appendChild(tag);
+
+    const priority = document.createElement("p");
+    priority.textContent = "Priority: ";
+    const strongPriority = document.createElement("strong");
+    strongPriority.textContent = formatText(t.priority);
+    priority.appendChild(strongPriority);
+
+    card.appendChild(priority);
+
+    const deadline = document.createElement("p");
+    deadline.textContent = "Deadline: "
+    const strongDeadline = document.createElement("strong");
+    strongDeadline.textContent = new Date(t.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    deadline.appendChild(strongDeadline);
+    card.appendChild(deadline);
+
+    const status = document.createElement("p");
+    status.textContent = "Status: "
+    const strongStatus = document.createElement("strong");
+    strongStatus.textContent = formatText(t.status)
+    status.appendChild(strongStatus);
+    card.appendChild(status);
+
+    const br2 = document.createElement("br");
+    card.appendChild(br2);
+
+    const assigned = document.createElement("p");
+    assigned.textContent = "Status: "
+    const strongAssigned = document.createElement("strong");
+    strongAssigned.textContent = formatText(t.assigned)
+    assigned.appendChild(strongAssigned);
+    card.appendChild(assigned);
+
+    const cardActions = document.createElement("div");
+    cardActions.className = "card-actions";
+
+    const editButton = document.createElement("button");
+    editButton.className = "btn-edit";
+    editButton.textContent = "Edit";
+    editButton.onclick = () => editTask(t.id);
+    cardActions.appendChild(editButton);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn-delete";
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = () => deleteTask(t.id);
+    cardActions.appendChild(deleteButton);
+
+    card.appendChild(cardActions);
+
+    list.appendChild(card);
+  });
 }
 
 // tasks - create
