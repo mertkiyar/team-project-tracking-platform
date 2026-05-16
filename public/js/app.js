@@ -386,9 +386,16 @@ async function loadTasks() {
     const deadline = document.createElement("p");
     deadline.textContent = "Deadline: "
     const strongDeadline = document.createElement("strong");
-    strongDeadline.textContent = new Date(t.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    strongDeadline.textContent = t.deadline ? new Date(t.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'No deadline';
     deadline.appendChild(strongDeadline);
     card.appendChild(deadline);
+
+    const project = document.createElement("p");
+    project.textContent = "Project: "
+    const strongProject = document.createElement("strong");
+    strongProject.textContent = t.project_title || "Unknown Project";
+    project.appendChild(strongProject);
+    card.appendChild(project);
 
     const status = document.createElement("p");
     status.textContent = "Status: "
@@ -401,9 +408,9 @@ async function loadTasks() {
     card.appendChild(br2);
 
     const assigned = document.createElement("p");
-    assigned.textContent = "Status: "
+    assigned.textContent = "Assigned: "
     const strongAssigned = document.createElement("strong");
-    strongAssigned.textContent = formatText(t.assigned)
+    strongAssigned.textContent = t.assigned_name || 'Unassigned';
     assigned.appendChild(strongAssigned);
     card.appendChild(assigned);
 
