@@ -209,19 +209,61 @@ async function loadUsers() {
   if (!users) return;
   const list = document.getElementById("userList");
   if (!list) return;
-  list.innerHTML = users.map((u) => `
-    <div class="card">
-      <h3>${u.name}</h3>
-      <p>${u.email}</p>
-      <br>
-      <p><strong>${u.department || 'N/A'}</strong></p>
-      <br>
-      <div class="card-actions">
-        <button class="btn-edit" onclick="editUser(${u.id})">Edit</button>
-        <button class="btn-delete" onclick="deleteUser(${u.id})">Delete</button>
-      </div>
-    </div>
-  `).join("");
+  // list.innerHTML = users.map((u) => `
+  //   <div class="card">
+  //     <h3>${u.name}</h3>
+  //     <p>${u.email}</p>
+  //     <br>
+  //     <p><strong>${u.department || 'N/A'}</strong></p>
+  //     <br>
+  //     <div class="card-actions">
+  //       <button class="btn-edit" onclick="editUser(${u.id})">Edit</button>
+  //       <button class="btn-delete" onclick="deleteUser(${u.id})">Delete</button>
+  //     </div>
+  //   </div>
+  // `).join("");
+
+  users.forEach((u) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const name = document.createElement("h3");
+    name.textContent = u.name;
+    card.appendChild(name);
+
+    const email = document.createElement("p");
+    email.textContent = u.email;
+    card.appendChild(email);
+
+    const br = document.createElement("br");
+    card.appendChild(br);
+
+    const department = document.createElement("strong");
+    department.textContent = u.department || "N/A";
+    card.appendChild(department);
+
+    const br2 = document.createElement("br");
+    card.appendChild(br2);
+
+    const cardActions = document.createElement("div");
+    cardActions.className = "card-actions";
+
+    const editButton = document.createElement("button");
+    editButton.className = "btn-edit";
+    editButton.textContent = "Edit";
+    editButton.onclick = () => editUser(u.id);
+    cardActions.appendChild(editButton);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn-delete";
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = () => deleteUser(u.id);
+    cardActions.appendChild(deleteButton);
+
+    card.appendChild(cardActions);
+
+    list.appendChild(card);
+  });
 }
 
 // users - create
