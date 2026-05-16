@@ -5,14 +5,16 @@ const dbPath = path.join(__dirname, "../../database.db");
 const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS users (
+  db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT CHECK(role IN ('admin', 'project_manager', 'employee')) DEFAULT 'employee',
     department TEXT
   )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS projects (
+  db.run(`CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT,
@@ -21,7 +23,7 @@ db.serialize(() => {
     end_date TEXT
   )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS project_members (
+  db.run(`CREATE TABLE IF NOT EXISTS project_members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
@@ -30,7 +32,7 @@ db.serialize(() => {
     FOREIGN KEY (user_id) REFERENCES users(id)
   )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS tasks (
+  db.run(`CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_id INTEGER NOT NULL,
     assigned_to INTEGER,
