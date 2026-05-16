@@ -50,6 +50,24 @@ nav {
     border-color: #3b82f6;
 }
 
+/* LOGOUT BUTTON */
+.logout-btn {
+    background: #ef4444;
+    border: 1px solid #ef4444;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-left: auto;
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
 /* MAIN LAYOUT */
 main {
     padding: 20px;
