@@ -54,21 +54,82 @@ async function loadProjects() {
   const projects = await api("/projects");
   if (!projects) return;
   const list = document.getElementById("projectList");
-  list.innerHTML = projects.map((p) => `
-    <div class="card">
-      <h3>${p.title}</h3>
-      <p>${p.description}</p>
-      <br>
-      <p>Start Date: <strong>${new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
-      <p>Predicted End Date: <strong>${new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
-      <p>Status: <strong>${formatText(p.status)}</strong></p>
-      <br>
-      <div class="card-actions">
-        <button class="btn-edit" onclick="editProject(${p.id})">Edit</button>
-        <button class="btn-delete" onclick="deleteProject(${p.id})">Delete</button>
-      </div>
-    </div>
-  `).join("");
+  // list.innerHTML = projects.map((p) => `
+  //   <div class="card">
+  //     <h3>${p.title}</h3>
+  //     <p>${p.description}</p>
+  //     <br>
+  //     <p>Start Date: <strong>${new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
+  //     <p>Predicted End Date: <strong>${new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
+  //     <p>Status: <strong>${formatText(p.status)}</strong></p>
+  //     <br>
+  //     <div class="card-actions">
+  //       <button class="btn-edit" onclick="editProject(${p.id})">Edit</button>
+  //       <button class="btn-delete" onclick="deleteProject(${p.id})">Delete</button>
+  //     </div>
+  //   </div>
+  // `).join("");
+
+  // projects card
+  projects.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = p.title;
+    card.appendChild(title);
+
+    const desc = document.createElement("p");
+    desc.textContent = p.description;
+    card.appendChild(desc);
+
+    const br = document.createElement("br");
+    card.appendChild(br); // empty line
+
+    const startDate = document.createElement("p");
+    startDate.textContent = "Start Date: "
+
+    const strongStartDate = document.createElement("strong");
+    strongStartDate.textContent = new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    startDate.appendChild(strongStartDate);
+    card.appendChild(startDate);
+
+    const endDate = document.createElement("p");
+    endDate.textContent = "Predicted End Date: "
+    const strongEndDate = document.createElement("strong");
+    strongEndDate.textContent = new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    startDate.appendChild(strongEndDate);
+    card.appendChild(startDate);
+
+    const status = document.createElement("p");
+    status.textContent = "Status: "
+    const strongStatus = document.createElement("strong");
+    strongStatus.textContent = formatText(p.status)
+    status.appendChild(strongStatus);
+    card.appendChild(status);
+
+    const br2 = document.createElement("br");
+    card.appendChild(br2); // empty line
+
+    const cardActions = document.createElement("div");
+    cardActions.className = "card-actions";
+
+    const editButton = document.createElement("button");
+    editButton.className = "btn-edit";
+    editButton.textContent = "Edit";
+    editButton.onclick = () => editProject(p.id);
+    cardActions.appendChild(editButton);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn-delete";
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = () => deleteProject(p.id);
+    cardActions.appendChild(deleteButton);
+
+    card.appendChild(cardActions);
+
+    list.appendChild(card);
+  });
 }
 
 // projects - create
