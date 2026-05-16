@@ -98,8 +98,8 @@ async function loadProjects() {
     endDate.textContent = "Predicted End Date: "
     const strongEndDate = document.createElement("strong");
     strongEndDate.textContent = new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    startDate.appendChild(strongEndDate);
-    card.appendChild(startDate);
+    endDate.appendChild(strongEndDate);
+    card.appendChild(endDate);
 
     const status = document.createElement("p");
     status.textContent = "Status: "
