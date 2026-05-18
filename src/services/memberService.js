@@ -54,12 +54,21 @@ const memberService = {
             if (!project_id || !user_id || !project_role) {
                 return reject(new Error("project_id, user_id and project_role are required"));
             }
-            db.run(
-                "INSERT INTO project_members (project_id, user_id, project_role) VALUES (?, ?, ?)",
-                [project_id, user_id, project_role],
-                function (err) {
-                    if (err) reject(err);
-                    else resolve({ id: this.lastID, ...data });
+            //check if already member
+            db.get(
+                "SELECT * FROM project_members WHERE project_id = ? AND user_id = ?",
+                [project_id, user_id],
+                (err, row) => {
+                    if (err) return reject(err);
+                    if (row) return reject(new Error("User is already a member of this project"));
+                    db.run(
+                        "INSERT INTO project_members (project_id, user_id, project_role) VALUES (?, ?, ?)",
+                        [project_id, user_id, project_role],
+                        function (err) {
+                            if (err) reject(err);
+                            else resolve({ id: this.lastID, ...data });
+                        }
+                    );
                 }
             );
         });
