@@ -130,21 +130,6 @@ async function loadProjects() {
   const projects = await api("/projects");
   if (!projects) return;
   const list = document.getElementById("projectList");
-  // list.innerHTML = projects.map((p) => `
-  //   <div class="card">
-  //     <h3>${p.title}</h3>
-  //     <p>${p.description}</p>
-  //     <br>
-  //     <p>Start Date: <strong>${new Date(p.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
-  //     <p>Predicted End Date: <strong>${new Date(p.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
-  //     <p>Status: <strong>${formatText(p.status)}</strong></p>
-  //     <br>
-  //     <div class="card-actions">
-  //       <button class="btn-edit" onclick="editProject(${p.id})">Edit</button>
-  //       <button class="btn-delete" onclick="deleteProject(${p.id})">Delete</button>
-  //     </div>
-  //   </div>
-  // `).join("");
 
   list.innerHTML = "";
 
@@ -419,24 +404,6 @@ async function loadTasks() {
   if (!tasks) return;
   const list = document.getElementById("taskList");
   if (!list) return;
-  // list.innerHTML = tasks.map((t) => `
-  //   <div class="card">
-  //     <h3>${t.title}</h3>
-  //     <p>${t.description || ''}</p>
-  //     <br>
-  //     <p>Tag: <strong>${formatText(t.tag)}</strong></p>
-  //     <p>Priority: <strong>${formatText(t.priority)}</strong></p>
-  //     <p>Deadline: <strong>${new Date(t.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</strong></p>
-  //     <p>Status: <strong>${formatText(t.status)}</strong></p>
-  //     <br>
-  //     <p>Assigned: <strong>${t.assigned_name || 'Unassigned'}</strong></p>
-  //     <br>
-  //     <div class="card-actions">
-  //       <button class="btn-edit" onclick="editTask(${t.id})">Edit</button>
-  //       <button class="btn-delete" onclick="deleteTask(${t.id})">Delete</button>
-  //     </div>
-  //   </div>
-  // `).join("");
 
   list.innerHTML = "";
 
