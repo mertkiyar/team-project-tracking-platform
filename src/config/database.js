@@ -44,6 +44,7 @@ db.serialize(() => {
     project_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     project_role TEXT,
+    UNIQUE(project_id, user_id),
     FOREIGN KEY (project_id) REFERENCES projects(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
   )`);
