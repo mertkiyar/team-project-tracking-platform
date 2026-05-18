@@ -325,7 +325,8 @@ async function loadUsers() {
 
   list.innerHTML = "";
 
-  users.forEach((u) => {
+  const nonAdminUsers = users.filter(u => u.role !== 'admin');
+  nonAdminUsers.forEach((u) => {
     const card = document.createElement("div");
     card.className = "card";
 
@@ -453,10 +454,9 @@ async function showAddMemberForm(projectId) {
   const users = await api("/users");
   const members = await api("/members");
 
-  // Filter users not already in project
   const projectMembers = members.filter(m => m.project_id === projectId);
   const availableUsers = users.filter(u =>
-    !projectMembers.find(m => m.user_id === u.id)
+    u.role !== 'admin' && !projectMembers.find(m => m.user_id === u.id)
   );
 
   let options = "";
@@ -485,12 +485,24 @@ async function showAddMemberForm(projectId) {
 
   modalForm.onsubmit = async (e) => {
     e.preventDefault();
+    const memberId = document.getElementById("memberId").value;
+    const memberRole = document.getElementById("memberRole").value;
+
+    console.log("Form data:", { projectId, memberId, memberRole });
+
     const data = {
-      project_id: projectId,
-      user_id: document.getElementById("memberId").value,
-      project_role: document.getElementById("memberRole").value
+      project_id: parseInt(projectId),
+      user_id: parseInt(memberId),
+      project_role: memberRole
     };
-    await api("/members", "POST", data);
+    console.log("Sending:", data);
+
+    const response = await api("/members", "POST", data);
+    console.log("Add member response:", response);
+    if (response.error) {
+      alert("Error: " + response.error);
+      return;
+    }
     closeModal();
     viewProjectMembers(projectId);
   };
