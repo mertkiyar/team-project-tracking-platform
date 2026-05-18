@@ -202,16 +202,43 @@ select {
 
 .card-actions button {
     border: none;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     transition: 0.2s;
     color: white;
+    flex: 1;
+    margin: 0;
+}
+
+.card-actions .btn-primary {
+    background: #3b82f6;
+}
+
+.card-actions .btn-primary:hover {
+    background: #2563eb;
+}
+
+.card-actions .btn-edit {
+    background: #f59e0b;
+}
+
+.card-actions .btn-edit:hover {
+    background: #d97706;
+}
+
+.card-actions .btn-delete {
+    background: #ef4444;
+}
+
+.card-actions .btn-delete:hover {
+    background: #dc2626;
 }
 
 .btn-edit {
-    background: #f59e0b; /* Amber/Yellow */
+    background: #f59e0b;
+    /* Amber/Yellow */
 }
 
 .btn-edit:hover {
@@ -219,7 +246,8 @@ select {
 }
 
 .btn-delete {
-    background: #ef4444; /* Red */
+    background: #ef4444;
+    /* Red */
 }
 
 .btn-delete:hover {

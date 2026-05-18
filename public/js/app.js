@@ -177,6 +177,12 @@ async function loadProjects() {
     const cardActions = document.createElement("div");
     cardActions.className = "card-actions";
 
+    const membersButton = document.createElement("button");
+    membersButton.className = "btn-primary";
+    membersButton.textContent = "Members";
+    membersButton.onclick = () => viewProjectMembers(p.id);
+    cardActions.appendChild(membersButton);
+
     const editButton = document.createElement("button");
     editButton.className = "btn-edit";
     editButton.textContent = "Edit";
@@ -264,6 +270,50 @@ async function editProject(id) {
     closeModal();
     loadProjects();
   };
+}
+
+// projects - view members
+async function viewProjectMembers(projectId) {
+  const members = await api("/members");
+  if (!members) return;
+
+  const projectMembers = members.filter(m => m.project_id === projectId);
+
+  let memberHtml = "";
+  projectMembers.forEach(m => {
+    memberHtml += `
+      <div class="member-item" data-id="${m.id}" style="padding: 12px; background: #f0f0f0; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong>${m.name}</strong><br>
+          <small>${m.email}</small>
+        </div>
+        <button class="btn-delete remove-member-btn" style="padding: 6px 10px; font-size: 12px;">Remove</button>
+      </div>
+    `;
+  });
+
+  if (projectMembers.length === 0) {
+    memberHtml = "<p>no members assigned</p>";
+  }
+
+  openModal("Project Members", `
+    <button id="addMemberBtn" class="btn-primary" style="margin-bottom: 15px;">+ Add Member</button>
+    <div id="memberList">${memberHtml}</div>
+  `);
+
+  document.getElementById("addMemberBtn")?.addEventListener("click", () => {
+    showAddMemberForm(projectId);
+  });
+
+  document.querySelectorAll(".remove-member-btn").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const memberId = e.target.closest(".member-item").dataset.id;
+      if (confirm("Remove this member from project?")) {
+        await api(`/members/${memberId}`, "DELETE");
+        viewProjectMembers(projectId);
+      }
+    });
+  });
 }
 
 // users - get
@@ -395,6 +445,54 @@ async function editUser(id) {
     await api(`/users/${id}`, "PUT", data);
     closeModal();
     loadUsers();
+  };
+}
+
+// members - add form
+async function showAddMemberForm(projectId) {
+  const users = await api("/users");
+  const members = await api("/members");
+
+  // Filter users not already in project
+  const projectMembers = members.filter(m => m.project_id === projectId);
+  const availableUsers = users.filter(u =>
+    !projectMembers.find(m => m.user_id === u.id)
+  );
+
+  let options = "";
+  availableUsers.forEach(u => {
+    options += `<option value="${u.id}">${u.name} (${u.email})</option>`;
+  });
+
+  if (availableUsers.length === 0) {
+    alert("No users available to add");
+    return;
+  }
+
+  openModal("Add Member to Project", `
+    <select id="memberId" required>
+      <option value="">Select User</option>
+      ${options}
+    </select>
+    <select id="memberRole" required>
+      <option value="">Select Role</option>
+      <option value="developer">Developer</option>
+      <option value="qa">QA</option>
+      <option value="designer">Designer</option>
+    </select>
+    <button type="submit" class="btn-primary">Add Member</button>
+  `);
+
+  modalForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+      project_id: projectId,
+      user_id: document.getElementById("memberId").value,
+      project_role: document.getElementById("memberRole").value
+    };
+    await api("/members", "POST", data);
+    closeModal();
+    viewProjectMembers(projectId);
   };
 }
 
