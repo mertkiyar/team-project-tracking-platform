@@ -14,7 +14,7 @@ async function handleLogin() {
 
   try {
     const response = await api("/auth/login", "POST", { email, password });
-    
+
     if (response.error) {
       errorLogin.style.display = "block";
       errorLogin.textContent = response.error;
@@ -36,6 +36,23 @@ async function handleLogin() {
 function showMainPage() {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("mainApp").style.display = "block";
+
+  const userRole = localStorage.getItem("userRole");
+
+  //role check
+  const usersNavBtn = document.querySelector('button[data-section="users"]');
+  const addProjectBtn = document.getElementById("addProjectBtn");
+  const addUserBtn = document.getElementById("addUserBtn");
+
+  if (userRole !== "admin") {
+    if (usersNavBtn) usersNavBtn.style.display = "none";
+    if (addProjectBtn) addProjectBtn.style.display = "none";
+    if (addUserBtn) addUserBtn.style.display = "none";
+  } else {
+    if (usersNavBtn) usersNavBtn.style.display = "inline-block"; // or "" based on css
+    if (addProjectBtn) addProjectBtn.style.display = "inline-block";
+    if (addUserBtn) addUserBtn.style.display = "inline-block";
+  }
 }
 
 function showLoginPage() {
@@ -102,10 +119,9 @@ function closeModal() {
 
 // init
 document.addEventListener("DOMContentLoaded", () => {
-  // Check authentication on page load
   checkAuth();
 
-  // Login - Enter tuşu ile giriş
+  //login
   const loginEmail = document.getElementById("loginEmail");
   const loginPassword = document.getElementById("loginPassword");
 
