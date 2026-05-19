@@ -49,13 +49,19 @@ const projectService = {
 
     delete(id) {
         return new Promise((resolve, reject) => {
-            db.run("DELETE FROM tasks WHERE project_id = ?", [id], (err) => {
+            //if a project has active task do not remove it
+            db.get("SELECT COUNT(*) AS count FROM tasks WHERE project_id = ? AND status != 'completed'", [id], (err, row) => {
                 if (err) return reject(err);
-                db.run("DELETE FROM project_members WHERE project_id = ?", [id], (err) => {
+                if (row.count > 0) return reject(new Error("Cannot delete project. There are active tasks in this project."));
+
+                db.run("DELETE FROM tasks WHERE project_id = ?", [id], (err) => {
                     if (err) return reject(err);
-                    db.run("DELETE FROM projects WHERE id = ?", [id], function (err) {
-                        if (err) reject(err);
-                        else resolve({ changes: this.changes });
+                    db.run("DELETE FROM project_members WHERE project_id = ?", [id], (err) => {
+                        if (err) return reject(err);
+                        db.run("DELETE FROM projects WHERE id = ?", [id], function (err) {
+                            if (err) reject(err);
+                            else resolve({ changes: this.changes });
+                        });
                     });
                 });
             });
