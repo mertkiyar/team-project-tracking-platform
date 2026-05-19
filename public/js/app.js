@@ -155,11 +155,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // projects - get
 async function loadProjects() {
-  const projects = await api("/projects");
-  if (!projects) return;
+  const allProjects = await api("/projects");
+  if (!allProjects) return;
   const list = document.getElementById("projectList");
 
   list.innerHTML = "";
+
+  const userRole = localStorage.getItem("userRole");
+  const userId = parseInt(localStorage.getItem("userId"), 10);
+
+  let projects = allProjects;
+  if (userRole !== "admin") {
+    const members = await api("/members");
+    const myMemberRecords = members.filter(m => m.user_id === userId);
+    const myProjectIds = myMemberRecords.map(m => m.project_id);
+    projects = allProjects.filter(p => myProjectIds.includes(p.id));
+  }
 
   // projects card
   projects.forEach((p) => {
@@ -205,25 +216,31 @@ async function loadProjects() {
     const cardActions = document.createElement("div");
     cardActions.className = "card-actions";
 
-    const membersButton = document.createElement("button");
-    membersButton.className = "btn-primary";
-    membersButton.textContent = "Members";
-    membersButton.onclick = () => viewProjectMembers(p.id);
-    cardActions.appendChild(membersButton);
+    if (userRole === "admin" || userRole === "project_manager") {
+      const membersButton = document.createElement("button");
+      membersButton.className = "btn-primary";
+      membersButton.textContent = "Members";
+      membersButton.onclick = () => viewProjectMembers(p.id);
+      cardActions.appendChild(membersButton);
+    }
 
-    const editButton = document.createElement("button");
-    editButton.className = "btn-edit";
-    editButton.textContent = "Edit";
-    editButton.onclick = () => editProject(p.id);
-    cardActions.appendChild(editButton);
+    if (userRole === "admin") {
+      const editButton = document.createElement("button");
+      editButton.className = "btn-edit";
+      editButton.textContent = "Edit";
+      editButton.onclick = () => editProject(p.id);
+      cardActions.appendChild(editButton);
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "btn-delete";
-    deleteButton.textContent = "Delete";
-    deleteButton.onclick = () => deleteProject(p.id);
-    cardActions.appendChild(deleteButton);
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "btn-delete";
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = () => deleteProject(p.id);
+      cardActions.appendChild(deleteButton);
+    }
 
-    card.appendChild(cardActions);
+    if (cardActions.hasChildNodes()) {
+      card.appendChild(cardActions);
+    }
 
     list.appendChild(card);
   });
