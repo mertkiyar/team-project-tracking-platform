@@ -60,6 +60,11 @@ function showMainPage() {
   } else {
     if (addTaskBtn) addTaskBtn.style.display = "inline-block";
   }
+
+  // Load data for the corresponding role
+  loadProjects();
+  loadUsers();
+  loadTasks();
 }
 
 function showLoginPage() {
@@ -154,10 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logoutBtn) {
     logoutBtn.addEventListener("click", logout);
   }
-
-  loadProjects();
-  loadUsers();
-  loadTasks();
 });
 
 // projects - get
