@@ -38,6 +38,12 @@ function showMainPage() {
   document.getElementById("mainApp").style.display = "block";
 
   const userRole = localStorage.getItem("userRole");
+  const userName = localStorage.getItem("userName");
+
+  const userInfo = document.getElementById("userInfo");
+  if (userInfo) {
+    userInfo.textContent = userName ? `${userName} (${userRole})` : "";
+  }
 
   //role check
   const usersNavBtn = document.querySelector('button[data-section="users"]');
