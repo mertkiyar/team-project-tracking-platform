@@ -1,7 +1,7 @@
 const API = "http://localhost:3000/api";
 
 //auth
-function handleLogin() {
+async function handleLogin() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
   const errorLogin = document.getElementById("loginError");
@@ -11,15 +11,25 @@ function handleLogin() {
     errorLogin.textContent = "Please fill all blanks!";
     return;
   }
-  // admin info
-  if (email === "admin@mail.com" && password === "1234") {
-    localStorage.setItem("authToken", "user_token_" + Date.now());
-    localStorage.setItem("userEmail", email);
-    showMainPage();
+
+  try {
+    const response = await api("/auth/login", "POST", { email, password });
+    
+    if (response.error) {
+      errorLogin.style.display = "block";
+      errorLogin.textContent = response.error;
+      return;
+    }
+
+    localStorage.setItem("authToken", response.token);
+    localStorage.setItem("userId", response.user.id);
+    localStorage.setItem("userName", response.user.name);
+    localStorage.setItem("userRole", response.user.role);
     errorLogin.style.display = "none";
-  } else {
+    showMainPage();
+  } catch (err) {
     errorLogin.style.display = "block";
-    errorLogin.textContent = "Email or password is wrong, try again!";
+    errorLogin.textContent = "Login failed. Please try again.";
   }
 }
 
@@ -35,7 +45,9 @@ function showLoginPage() {
 
 function logout() {
   localStorage.removeItem("authToken");
-  localStorage.removeItem("userEmail");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  localStorage.removeItem("userRole");
   document.getElementById("loginEmail").value = "";
   document.getElementById("loginPassword").value = "";
   showLoginPage();
