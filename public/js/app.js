@@ -43,6 +43,7 @@ function showMainPage() {
   const usersNavBtn = document.querySelector('button[data-section="users"]');
   const addProjectBtn = document.getElementById("addProjectBtn");
   const addUserBtn = document.getElementById("addUserBtn");
+  const addTaskBtn = document.getElementById("addTaskBtn");
 
   if (userRole !== "admin") {
     if (usersNavBtn) usersNavBtn.style.display = "none";
@@ -52,6 +53,12 @@ function showMainPage() {
     if (usersNavBtn) usersNavBtn.style.display = "inline-block"; // or "" based on css
     if (addProjectBtn) addProjectBtn.style.display = "inline-block";
     if (addUserBtn) addUserBtn.style.display = "inline-block";
+  }
+
+  if (userRole === "employee") {
+    if (addTaskBtn) addTaskBtn.style.display = "none";
+  } else {
+    if (addTaskBtn) addTaskBtn.style.display = "inline-block";
   }
 }
 
@@ -555,12 +562,24 @@ async function showAddMemberForm(projectId) {
 
 // tasks - get
 async function loadTasks() {
-  const tasks = await api("/tasks");
-  if (!tasks) return;
+  const allTasks = await api("/tasks");
+  if (!allTasks) return;
   const list = document.getElementById("taskList");
   if (!list) return;
 
   list.innerHTML = "";
+
+  const userRole = localStorage.getItem("userRole");
+  const userId = parseInt(localStorage.getItem("userId"), 10);
+
+  let tasks = allTasks;
+  if (userRole === "project_manager") {
+    const members = await api("/members");
+    const myProjectIds = members.filter(m => m.user_id === userId).map(m => m.project_id);
+    tasks = allTasks.filter(t => myProjectIds.includes(t.project_id));
+  } else if (userRole === "employee") {
+    tasks = allTasks.filter(t => t.assigned_to === userId);
+  }
 
   tasks.forEach((t) => {
     const card = document.createElement("div");
@@ -633,11 +652,13 @@ async function loadTasks() {
     editButton.onclick = () => editTask(t.id);
     cardActions.appendChild(editButton);
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "btn-delete";
-    deleteButton.textContent = "Delete";
-    deleteButton.onclick = () => deleteTask(t.id);
-    cardActions.appendChild(deleteButton);
+    if (userRole !== "employee") {
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "btn-delete";
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = () => deleteTask(t.id);
+      cardActions.appendChild(deleteButton);
+    }
 
     card.appendChild(cardActions);
 
@@ -647,7 +668,16 @@ async function loadTasks() {
 
 // tasks - create
 document.getElementById("addTaskBtn")?.addEventListener("click", async () => {
-  const [projects, users] = await Promise.all([api("/projects"), api("/users")]);
+  const [allProjects, users, members] = await Promise.all([api("/projects"), api("/users"), api("/members")]);
+
+  const userRole = localStorage.getItem("userRole");
+  const userId = parseInt(localStorage.getItem("userId"), 10);
+
+  let projects = allProjects;
+  if (userRole === "project_manager") {
+    const myProjectIds = members.filter(m => m.user_id === userId).map(m => m.project_id);
+    projects = allProjects.filter(p => myProjectIds.includes(p.id));
+  }
 
   openModal("Add New Task", `
     <input type="text" id="taskTitle" placeholder="Task Title" required />
@@ -709,59 +739,96 @@ async function deleteTask(id) {
 
 // tasks - update
 async function editTask(id) {
-  const [task, projects, users] = await Promise.all([
+  const [task, allProjects, users, members] = await Promise.all([
     api(`/tasks/${id}`),
     api("/projects"),
-    api("/users")
+    api("/users"),
+    api("/members")
   ]);
   if (!task) return;
 
-  openModal("Edit Task", `
-    <input type="text" id="taskTitle" placeholder="Task Title" value="${task.title}" required />
-    <textarea id="taskDesc" placeholder="Description">${task.description || ''}</textarea>
-    <select id="taskProject" required>
-      <option value="">Select Project</option>
-      ${projects.map(p => `<option value="${p.id}" ${p.id == task.project_id ? 'selected' : ''}>${p.title}</option>`).join('')}
-    </select>
-    <select id="taskUser">
-      <option value="">Assign User (Optional)</option>
-      ${users.map(u => `<option value="${u.id}" ${u.id == task.assigned_to ? 'selected' : ''}>${u.name}</option>`).join('')}
-    </select>
-    <select id="taskPriority">
-      <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
-      <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
-      <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
-    </select>
-    <select id="taskTag">
-      <option value="feature" ${task.tag === 'feature' ? 'selected' : ''}>Feature</option>
-      <option value="bug" ${task.tag === 'bug' ? 'selected' : ''}>Bug</option>
-      <option value="fix" ${task.tag === 'fix' ? 'selected' : ''}>Fix</option>
-      <option value="enhancement" ${task.tag === 'enhancement' ? 'selected' : ''}>Enhancement</option>
-      <option value="docs" ${task.tag === 'docs' ? 'selected' : ''}>Docs</option>
-    </select>
-    <select id="taskStatus">
-      <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
-      <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-      <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
-    </select>
-    <input type="date" id="taskDeadline" value="${task.deadline || ''}" />
-    <button type="submit" class="btn-primary">Update Task</button>
-  `);
+  const userRole = localStorage.getItem("userRole");
+  const userId = parseInt(localStorage.getItem("userId"), 10);
 
-  modalForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const data = {
-      title: document.getElementById("taskTitle").value,
-      description: document.getElementById("taskDesc").value,
-      project_id: document.getElementById("taskProject").value,
-      assigned_to: document.getElementById("taskUser").value || null,
-      tag: document.getElementById("taskTag").value,
-      priority: document.getElementById("taskPriority").value,
-      status: document.getElementById("taskStatus").value,
-      deadline: document.getElementById("taskDeadline").value
+  let projects = allProjects;
+  if (userRole === "project_manager") {
+    const myProjectIds = members.filter(m => m.user_id === userId).map(m => m.project_id);
+    projects = allProjects.filter(p => myProjectIds.includes(p.id));
+  }
+
+  if (userRole === "employee") {
+    //employee do not edit any thing without status
+    openModal("Edit Task Status", `
+      <p><strong>Task:</strong> ${task.title}</p>
+      <p>${task.description}</p>
+      <br>
+      <select id="taskStatus">
+        <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+        <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+        <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
+      </select>
+      <button type="submit" class="btn-primary">Update Status</button>
+    `);
+
+    modalForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        ...task,
+        status: document.getElementById("taskStatus").value
+      };
+      await api(`/tasks/${id}`, "PUT", data);
+      closeModal();
+      loadTasks();
     };
-    await api(`/tasks/${id}`, "PUT", data);
-    closeModal();
-    loadTasks();
-  };
+  } else {
+    // for admin and prj. mng
+    openModal("Edit Task", `
+      <input type="text" id="taskTitle" placeholder="Task Title" value="${task.title}" required />
+      <textarea id="taskDesc" placeholder="Description">${task.description || ''}</textarea>
+      <select id="taskProject" required>
+        <option value="">Select Project</option>
+        ${projects.map(p => `<option value="${p.id}" ${p.id == task.project_id ? 'selected' : ''}>${p.title}</option>`).join('')}
+      </select>
+      <select id="taskUser">
+        <option value="">Assign User (Optional)</option>
+        ${users.map(u => `<option value="${u.id}" ${u.id == task.assigned_to ? 'selected' : ''}>${u.name}</option>`).join('')}
+      </select>
+      <select id="taskPriority">
+        <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+        <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+        <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+      </select>
+      <select id="taskTag">
+        <option value="feature" ${task.tag === 'feature' ? 'selected' : ''}>Feature</option>
+        <option value="bug" ${task.tag === 'bug' ? 'selected' : ''}>Bug</option>
+        <option value="fix" ${task.tag === 'fix' ? 'selected' : ''}>Fix</option>
+        <option value="enhancement" ${task.tag === 'enhancement' ? 'selected' : ''}>Enhancement</option>
+        <option value="docs" ${task.tag === 'docs' ? 'selected' : ''}>Docs</option>
+      </select>
+      <select id="taskStatus">
+        <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+        <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+        <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
+      </select>
+      <input type="date" id="taskDeadline" value="${task.deadline || ''}" />
+      <button type="submit" class="btn-primary">Update Task</button>
+    `);
+
+    modalForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        title: document.getElementById("taskTitle").value,
+        description: document.getElementById("taskDesc").value,
+        project_id: document.getElementById("taskProject").value,
+        assigned_to: document.getElementById("taskUser").value || null,
+        tag: document.getElementById("taskTag").value,
+        priority: document.getElementById("taskPriority").value,
+        status: document.getElementById("taskStatus").value,
+        deadline: document.getElementById("taskDeadline").value
+      };
+      await api(`/tasks/${id}`, "PUT", data);
+      closeModal();
+      loadTasks();
+    };
+  }
 }
