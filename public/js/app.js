@@ -231,7 +231,7 @@ async function loadProjects() {
       cardActions.appendChild(membersButton);
     }
 
-    if (userRole === "admin") {
+    if (userRole === "admin" || userRole === "project_manager") {
       const editButton = document.createElement("button");
       editButton.className = "btn-edit";
       editButton.textContent = "Edit";
@@ -286,7 +286,10 @@ document.getElementById("addProjectBtn")?.addEventListener("click", () => {
 // projects - delete
 async function deleteProject(id) {
   if (confirm("Are you sure you want to delete this project?")) {
-    await api(`/projects/${id}`, "DELETE");
+    const res = await api(`/projects/${id}`, "DELETE");
+    if (res && res.error) {
+      alert("Error: " + res.error);
+    }
     loadProjects();
   }
 }
@@ -732,7 +735,10 @@ document.getElementById("addTaskBtn")?.addEventListener("click", async () => {
 // tasks - delete
 async function deleteTask(id) {
   if (confirm("Are you sure you want to delete this task?")) {
-    await api(`/tasks/${id}`, "DELETE");
+    const res = await api(`/tasks/${id}`, "DELETE");
+    if (res && res.error) {
+      alert("Error: " + res.error);
+    }
     loadTasks();
   }
 }
