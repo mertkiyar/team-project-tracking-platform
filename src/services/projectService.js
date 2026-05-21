@@ -52,7 +52,7 @@ const projectService = {
             //if a project has active task do not remove it
             db.get("SELECT COUNT(*) AS count FROM tasks WHERE project_id = ? AND status != 'completed'", [id], (err, row) => {
                 if (err) return reject(err);
-                if (row.count > 0) return reject(new Error("Cannot delete project. There are active tasks in this project."));
+                if (row.count > 0) return reject(new Error("you cannot delete this project bevause there are active tasks in this project."));
 
                 db.run("DELETE FROM tasks WHERE project_id = ?", [id], (err) => {
                     if (err) return reject(err);
